@@ -14,12 +14,13 @@ namespace Backuper
     {
         private IWebDriver driver;
         private Regex regex = new(@"\d+\.?\d+");
+        private bool isAdmin;
 
-        public Downloader(IWebDriver driver)
+        public Downloader(IWebDriver driver, bool isAdmin)
         {
             this.driver = driver;
+            this.isAdmin = isAdmin;
         }
-
 
         public void CustomDownload(string mainName, string courseName, ReadOnlyCollection<IWebElement> subFolders, float maxSize = float.PositiveInfinity)
         {
@@ -28,17 +29,21 @@ namespace Backuper
                 IWebElement subAnchor = subFolder.FindElement(By.XPath("span/a"));
                 DirectoryInfo path = Directory.CreateDirectory(Path.Combine(mainName, courseName, subAnchor.GetAttribute("innerHTML")));
                 driver.Navigate().GoToUrl(subAnchor.GetAttribute("href"));
-                DoProcess(maxSize, path);
+                if (isAdmin)
+                    DoProcessAdmin(maxSize, path);
+                else
+                    DoProcess(maxSize, path);
             }
-            Console.WriteLine(courseName);
         }
 
         public void CustomDownload(string mainName, string courseName, string courseUrl, float maxSize = float.PositiveInfinity)
         {
             DirectoryInfo path = Directory.CreateDirectory(Path.Combine(mainName, courseName));
             driver.Navigate().GoToUrl(courseUrl);
-            DoProcess(maxSize, path);
-            Console.WriteLine(courseName);
+            if (isAdmin)
+                DoProcessAdmin(maxSize, path);
+            else
+                DoProcess(maxSize, path);
         }
 
         private void DoProcess(float maxSize, DirectoryInfo path)
@@ -83,6 +88,24 @@ namespace Backuper
                 }
             }
             Task.WaitAll(tasks.ToArray());
+        }
+        private void DoProcessAdmin(float maxSize, DirectoryInfo path)
+        {
+            while (true)
+            {
+                var rows = driver.FindElements(By.XPath("//tbody/tr"));
+                //DownloadTable(rows, path.FullName, maxSize);
+                var buttons = driver.FindElements(By.XPath("//span[@class='Next']"));
+                if (buttons.Count > 0)
+                    new Actions(driver).MoveToElement(buttons[0]).Click().Perform();
+                else
+                    break;
+            }
+        }
+
+        private void DownloadTable(ReadOnlyCollection<IWebElement> pdfItems, string folder, float maxSize)
+        {
+
         }
     }
 }

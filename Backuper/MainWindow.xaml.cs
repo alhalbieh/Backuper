@@ -2,6 +2,7 @@
 using OpenQA.Selenium.Chrome;
 using System;
 using System.IO;
+using System.Threading;
 using System.Windows;
 namespace Backuper
 {
@@ -12,9 +13,59 @@ namespace Backuper
     {
         public MainWindow()
         {
-            //InitializeComponent();
+            InitializeComponent();
 
-            ChromeOptions chromeOptions = new ChromeOptions();
+            ChromeOptions chromeOptions = new();
+            chromeOptions.AddArgument("headless");
+            IWebDriver driver = new ChromeDriver(chromeOptions);
+            IWebDriver scraper = new ChromeDriver(chromeOptions);
+
+            DirectoryInfo cwd = Directory.CreateDirectory(@"C:\TestingApp");
+            Directory.SetCurrentDirectory(cwd.FullName);
+
+            driver.Navigate().GoToUrl("https://bank.engzenon.com");
+            scraper.Navigate().GoToUrl("https://bank.engzenon.com/login");
+
+            scraper.FindElement(By.Id("UserUsername")).SendKeys("AhmadHalabieh");
+            Thread.Sleep(1000);
+            scraper.FindElement(By.Id("UserPassword")).SendKeys("5fcf01ebb");
+            Thread.Sleep(1000);
+            scraper.FindElement(By.XPath("//button[@class='btn-icon submit']")).Click();
+            var accountNav = scraper.FindElements(By.XPath("//ul[@id='user-account-nav']/li/a/span"));
+            bool isLoggedin = accountNav[1].Text == "Logout";
+
+            Downloader downloader = new(scraper, isLoggedin);
+
+            var mainFolders = driver.FindElements(By.XPath("//div[@class='content-box']/ul/li"));
+            foreach (IWebElement mainFolder in mainFolders)
+            {
+                Console.WriteLine(mainFolder.Text);
+                var courseFolders = mainFolder.FindElements(By.XPath("ul/li"));
+                foreach (IWebElement courseFolder in courseFolders)
+                {
+                    string courseName = courseFolder.FindElement(By.XPath("span/a")).GetAttribute("innerHTML");
+                    string courseUrl = courseFolder.FindElement(By.XPath("span/a")).GetAttribute("href");
+
+                    var subFolders = courseFolder.FindElements(By.XPath("ul/li"));
+                    Console.WriteLine(courseName);
+                    if (subFolders.Count > 0)
+                        downloader.CustomDownload(mainFolder.Text, courseName, subFolders, 10);
+                    else
+                        downloader.CustomDownload(mainFolder.Text, courseName, courseUrl, 10);
+                }
+                Console.WriteLine("***********************************");
+            }
+            this.Close();
+            driver.Quit();
+            scraper.Quit();
+
+
+        }
+    }
+}
+
+/*
+ChromeOptions chromeOptions = new ChromeOptions();
             chromeOptions.AddArgument("headless");
             IWebDriver driver = new ChromeDriver(chromeOptions);
             IWebDriver scraper = new ChromeDriver(chromeOptions);
@@ -27,7 +78,7 @@ namespace Backuper
             var mainFolders = driver.FindElements(By.XPath("//div[@class='content-box']/ul/li"));
             foreach (IWebElement mainFolder in mainFolders)
             {
-                Directory.CreateDirectory(mainFolder.Text);
+                //Directory.CreateDirectory(mainFolder.Text);
 
                 var courseFolders = mainFolder.FindElements(By.XPath("ul/li"));
                 foreach (IWebElement courseFolder in courseFolders)
@@ -42,11 +93,9 @@ namespace Backuper
                         downloader.CustomDownload(mainFolder.Text, courseName, courseUrl, 10);
                 }
                 Console.WriteLine("***********************************");
-            }
-            this.Close();
-            driver.Quit();
-            scraper.Quit();
 
-        }
-    }
-}
+                //this.Close();
+                driver.Quit();
+                scraper.Quit();
+            }
+*/
