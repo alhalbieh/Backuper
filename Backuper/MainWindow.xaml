@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Backuper"
         mc:Ignorable="d"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
         Title="MainWindow" Height="450" Width="450">
+
     <Grid>
         <!--#region -->
         <Grid.ColumnDefinitions>
@@ -30,7 +32,7 @@
                 <TextBox Text="sadsadsadadsadsadasd" VerticalAlignment="Center"/>
             </StackPanel>
         </StackPanel>
-        
+
         <StackPanel Grid.Row="2" Grid.Column="1">
             <Grid x:Name="gridUsername">
                 <TextBox Width="100"  VerticalAlignment="Center" HorizontalAlignment="Left" x:Name="SearchTermTextBox" Margin="5"/>
@@ -48,5 +50,12 @@
                 </TextBlock>
             </Grid>
         </StackPanel>
+        <ItemsControl Grid.Column="2" Grid.Row="2" ItemsSource="{Binding MainWatch}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}"></TextBlock>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
     </Grid>
 </Window>
