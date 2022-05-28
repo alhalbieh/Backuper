@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 namespace Backuper
 {
@@ -28,26 +29,24 @@ namespace Backuper
             //chromeOptions.AddArgument("headless");
             using var home = new ChromeDriver(chromeOptions);
             using var scrapper = new ChromeDriver(chromeOptions);
-            using var opener = new ChromeDriver(chromeOptions);
 
             var cwd = Directory.CreateDirectory(@"C:\TestingApp");
             Directory.SetCurrentDirectory(cwd.FullName);
 
-            Login(home);
-            Login(scrapper);
-            Login(opener);
+            Utils.Login(home);
+            Utils.Login(scrapper);
 
             var accountNav = home.FindElements(By.XPath("//ul[@id='user-account-nav']/li/a/span"));
             bool isLoggedin = accountNav[1].Text == "Logout";
 
-            var downloader = new Downloader(scrapper, opener, isLoggedin);
+            var downloader = new Downloader(scrapper, isLoggedin);
 
-            var mainFolders = home.FindElements(By.XPath("//div[@class='content-box']/ul/li"));
+            var categories = home.FindElements(By.XPath("//div[@class='content-box']/ul/li"));
 
-            foreach (var mainFolder in mainFolders)
+            foreach (var category in categories)
             {
-                Console.WriteLine(mainFolder.Text);
-                var courseFolders = mainFolder.FindElements(By.XPath("ul/li"));
+                Console.WriteLine(category.Text);
+                var courseFolders = category.FindElements(By.XPath("ul/li"));
                 foreach (IWebElement courseFolder in courseFolders)
                 {
                     string courseName = courseFolder.FindElement(By.XPath("span/a")).GetAttribute("innerHTML");
@@ -57,27 +56,15 @@ namespace Backuper
                     Console.WriteLine(courseName);
                     if (subFolders.Count > 0)
                     {
-                        downloader.CustomDownload(mainFolder.Text, courseName, subFolders);
+                        downloader.DownloadCourseWithSubs(category.Text, courseName, subFolders, 1);
                     }
                     else
                     {
-                        downloader.CustomDownload(mainFolder.Text, courseName, courseUrl);
+                        downloader.DownloadCourse(category.Text, courseName, courseUrl, 1);
                     }
                 }
                 Console.WriteLine("***********************************");
             }
-
-        }
-
-
-        public void Login(IWebDriver driver)
-        {
-            driver.Navigate().GoToUrl("https://bank.engzenon.com/login");
-            driver.FindElement(By.Id("UserUsername")).SendKeys("AhmadHalabieh");
-            Thread.Sleep(250);
-            driver.FindElement(By.Id("UserPassword")).SendKeys("5fcf01ebb");
-            Thread.Sleep(250);
-            driver.FindElement(By.XPath("//button[@class='btn-icon submit']")).Click();
         }
     }
 }
