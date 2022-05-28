@@ -49,11 +49,12 @@ namespace Backuper
                 var courseFolders = category.FindElements(By.XPath("ul/li"));
                 foreach (IWebElement courseFolder in courseFolders)
                 {
+                    using var writer = new StreamWriter("Completed Courses.txt", true);
+
                     string courseName = courseFolder.FindElement(By.XPath("span/a")).GetAttribute("innerHTML");
                     string courseUrl = courseFolder.FindElement(By.XPath("span/a")).GetAttribute("href");
 
                     var subFolders = courseFolder.FindElements(By.XPath("ul/li"));
-                    Console.WriteLine(courseName);
                     if (subFolders.Count > 0)
                     {
                         downloader.DownloadCourseWithSubs(category.Text, courseName, subFolders, 1);
@@ -62,45 +63,10 @@ namespace Backuper
                     {
                         downloader.DownloadCourse(category.Text, courseName, courseUrl, 1);
                     }
+                    writer.WriteLine(courseName);
                 }
                 Console.WriteLine("***********************************");
             }
         }
     }
 }
-
-/*
-ChromeOptions chromeOptions = new ChromeOptions();
-            chromeOptions.AddArgument("headless");
-            IWebDriver driver = new ChromeDriver(chromeOptions);
-            IWebDriver scraper = new ChromeDriver(chromeOptions);
-            Downloader downloader = new(scraper);
-
-            DirectoryInfo cwd = Directory.CreateDirectory(@"C:\TestingApp");
-            Directory.SetCurrentDirectory(cwd.FullName);
-            driver.Navigate().GoToUrl("https://bank.engzenon.com");
-
-            var mainFolders = driver.FindElements(By.XPath("//div[@class='content-box']/ul/li"));
-            foreach (IWebElement mainFolder in mainFolders)
-            {
-                //Directory.CreateDirectory(mainFolder.Text);
-
-                var courseFolders = mainFolder.FindElements(By.XPath("ul/li"));
-                foreach (IWebElement courseFolder in courseFolders)
-                {
-                    string courseName = courseFolder.FindElement(By.XPath("span/a")).GetAttribute("innerHTML");
-                    string courseUrl = courseFolder.FindElement(By.XPath("span/a")).GetAttribute("href");
-
-                    var subFolders = courseFolder.FindElements(By.XPath("ul/li"));
-                    if (subFolders.Count > 0)
-                        downloader.CustomDownload(mainFolder.Text, courseName, subFolders, 10);
-                    else
-                        downloader.CustomDownload(mainFolder.Text, courseName, courseUrl, 10);
-                }
-                Console.WriteLine("***********************************");
-
-                //this.Close();
-                driver.Quit();
-                scraper.Quit();
-            }
-*/

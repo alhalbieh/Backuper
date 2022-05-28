@@ -15,7 +15,6 @@ namespace Backuper
     public class Downloader
     {
         private string largeFilesText = "Large Files.txt";
-        private string doneFoldersText = "Progress.txt";
         private IWebDriver scrapper;
         private Regex regex = new(@"\d+\.?\d+");
         private bool isAdmin;
@@ -30,15 +29,13 @@ namespace Backuper
                                            ReadOnlyCollection<IWebElement> subFolders,
                                            float maxSize = float.PositiveInfinity)
         {
-            using var writer = new StreamWriter(doneFoldersText, true);
-            writer.WriteLine(courseName);
             foreach (var subFolder in subFolders)
             {
                 var subAnchor = subFolder.FindElement(By.XPath("span/a"));
                 var subFolderName = subAnchor.GetAttribute("innerHTML");
                 var downloadFolder = Directory.CreateDirectory(Path.Combine(categoryName, courseName, subFolderName)).FullName;
                 scrapper.Navigate().GoToUrl(subAnchor.GetAttribute("href"));
-                writer.Write($" {subFolderName}: ");
+                /*
                 if (isAdmin)
                 {
                     DownloadFolderAdmin(maxSize, downloadFolder);
@@ -47,28 +44,27 @@ namespace Backuper
                 {
                     DownloadFolder(maxSize, downloadFolder);
                 }
-                writer.WriteLine("Done");
+                */
+                DownloadFolderAdmin(maxSize, downloadFolder);
             }
         }
 
         public void DownloadCourse(string categoryName, string courseName, string courseUrl, float maxSize = float.PositiveInfinity)
         {
-            using var writer = new StreamWriter(doneFoldersText, true);
             var downloadFolder = Directory.CreateDirectory(Path.Combine(categoryName, courseName)).FullName;
             scrapper.Navigate().GoToUrl(courseUrl);
 
-            writer.Write($"{courseName}: ");
-            if (isAdmin)
+            /*if (isAdmin)
             {
                 DownloadFolderAdmin(maxSize, downloadFolder);
             }
             else
             {
                 DownloadFolder(maxSize, downloadFolder);
-            }
-            writer.WriteLine("Done");
+            }*/
+            DownloadFolderAdmin(maxSize, downloadFolder);
         }
-
+        /*
         private void DownloadFolder(float maxSize, string downloadFolder)
         {
             while (true)
@@ -116,7 +112,7 @@ namespace Backuper
             }
             Task.WaitAll(tasks.ToArray());
         }
-
+        */
         private void DownloadFolderAdmin(float maxSize, string downloadFolder)
         {
             var pdfNames = new List<string>();
