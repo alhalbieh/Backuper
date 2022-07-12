@@ -13,4 +13,8 @@
     <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="101.0.4951.4100" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DataDownload\DataDownload.csproj" />
+  </ItemGroup>
+
 </Project>

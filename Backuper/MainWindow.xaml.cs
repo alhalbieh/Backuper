@@ -1,13 +1,8 @@
 ﻿using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 namespace Backuper
 {
@@ -25,16 +20,11 @@ namespace Backuper
         public MainWindow()
         {
             InitializeComponent();
-            ChromeOptions chromeOptions = new();
-            //chromeOptions.AddArgument("headless");
-            using var home = new ChromeDriver(chromeOptions);
-            using var scrapper = new ChromeDriver(chromeOptions);
+            using var home = Utils.CreateChromeDriver();
+            using var scrapper = Utils.CreateChromeDriver();
 
             var cwd = Directory.CreateDirectory(@"C:\TestingApp");
             Directory.SetCurrentDirectory(cwd.FullName);
-
-            Utils.Login(home);
-            Utils.Login(scrapper);
 
             var accountNav = home.FindElements(By.XPath("//ul[@id='user-account-nav']/li/a/span"));
             bool isLoggedin = accountNav[1].Text == "Logout";
@@ -57,11 +47,11 @@ namespace Backuper
                     var subFolders = courseFolder.FindElements(By.XPath("ul/li"));
                     if (subFolders.Count > 0)
                     {
-                        downloader.DownloadCourseWithSubs(category.Text, courseName, subFolders, 1);
+                        downloader.DownloadCourseWithSubs(category.Text, courseName, subFolders);
                     }
                     else
                     {
-                        downloader.DownloadCourse(category.Text, courseName, courseUrl, 1);
+                        downloader.DownloadCourse(category.Text, courseName, courseUrl);
                     }
                     writer.WriteLine(courseName);
                 }
