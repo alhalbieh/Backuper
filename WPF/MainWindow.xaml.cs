@@ -42,7 +42,6 @@ namespace WPF
             using var _driver = Utils.CreateChromeDriver();
             AvaliableCategories = new ObservableCollection<string>(Bank.GetCategories(_driver).Select(x => x.Text).ToList());
             DownloadCategories = new ObservableCollection<string>();
-            DataContext = this;
             InitializeComponent();
         }
 
@@ -55,10 +54,12 @@ namespace WPF
         {
             DragMove();
         }
+
         private void MinimizeButton_Click(object sender, RoutedEventArgs e)
         {
             WindowState = WindowState.Minimized;
         }
+
         private void ChangeStateButton_Click(object sender, RoutedEventArgs e)
         {
             if (WindowState == WindowState.Normal)
@@ -66,14 +67,12 @@ namespace WPF
             else
                 WindowState = WindowState.Normal;
         }
+
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             Close();
         }
-        private void TopBorderControl_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            WindowState = WindowState.Minimized;
-        }
+
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
             var selectedItems = (AvaliableListView.SelectedItems).Cast<string>().ToList();
@@ -84,6 +83,7 @@ namespace WPF
             }
 
         }
+
         private void RemoveButton_Click(object sender, RoutedEventArgs e)
         {
             List<string> selectedItems = (DownloadListView.SelectedItems).Cast<string>().ToList();
@@ -93,6 +93,7 @@ namespace WPF
                 DownloadCategories.Remove(selectedItem);
             }
         }
+
         private void BrowseButton_Click(object sender, RoutedEventArgs e)
         {
 
