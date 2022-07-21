@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 namespace WPF
@@ -15,8 +16,10 @@ namespace WPF
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
         private string downloadPath = "Pick a folder to store";
+        private bool isNotDownloading = true;
         public ObservableCollection<string> AvaliableCategories { get; set; }
         public ObservableCollection<string> DownloadCategories { get; set; }
+        //public Dictionary<string, ObservableCollection<string>> AvaliableCourses { get; set; }
 
         public string DownloadPath
         {
@@ -30,6 +33,18 @@ namespace WPF
                 }
             }
         }
+        public bool IsNotDownloading
+        {
+            get { return isNotDownloading; }
+            set
+            {
+                if (isNotDownloading != value)
+                {
+                    isNotDownloading = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string? name = null)
@@ -39,7 +54,7 @@ namespace WPF
 
         public MainWindow()
         {
-            using var _driver = Utils.CreateChromeDriver();
+            using var _driver = Utils.CreateChromeDriver(login: false);
             AvaliableCategories = new ObservableCollection<string>(Bank.GetCategories(_driver).Select(x => x.Text).ToList());
             DownloadCategories = new ObservableCollection<string>();
             InitializeComponent();
@@ -47,7 +62,8 @@ namespace WPF
 
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
-            await Bank.Backup(DownloadCategories, DownloadPath);
+            IsNotDownloading = false;
+            await Task.Run(() => Bank.Backup(DownloadCategories, DownloadPath));
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
