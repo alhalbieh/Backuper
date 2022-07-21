@@ -6,6 +6,13 @@
         <Setter Property="Foreground" Value="Gray"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Width" Value="40"/>
+        <Setter Property="Height" Value="30"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="Transparent" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <Style TargetType="{x:Type Button}" x:Key="ChangeStateButton" BasedOn="{StaticResource TopButton}">
@@ -21,4 +28,46 @@
         </Style.Triggers>
     </Style>
 
+    <Style TargetType="{x:Type Button}" x:Key="DownloadControl">
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Background">
+            <Setter.Value>
+                <LinearGradientBrush StartPoint="0,1" EndPoint="1,1">
+                    <GradientStop Color="LightSteelBlue" Offset="0.1"/>
+                    <GradientStop Color="Goldenrod" Offset="1"/>
+                </LinearGradientBrush>
+            </Setter.Value>
+        </Setter>
+        
+        <Style.Resources>
+            <Style TargetType="Border">
+                <Setter Property="CornerRadius" Value="5"/>
+            </Style>
+        </Style.Resources>
+    </Style>
+
+    <Style TargetType="{x:Type ListView}" x:Key="CategoriesView">
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="SelectionMode" Value="Extended"/>
+        <Setter Property="MinWidth" Value="220"/>
+        <Setter Property="MinHeight" Value="250"/>
+        <Setter Property="Margin" Value="5"/>
+        <Setter Property="BorderThickness" Value="3"/>
+        <Setter Property="BorderBrush" Value="Black"/>
+    </Style>
+
+    <!--
+    <Style TargetType="{x:Type Button}" x:Key="DownloadButton">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=NotDownloading}" Value="false">
+                <Setter Property="Background" Value="Red"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    Style="{Binding Source={StaticResource DownloadButton}}">
+    -->
 </ResourceDictionary>
