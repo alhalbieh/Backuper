@@ -6,11 +6,16 @@ namespace DataDownload
 {
     public class Downloader : IDisposable
     {
-        private readonly string largeFilesTxt = "Large Files.txt";
         private readonly IWebDriver scrapper = Utils.CreateChromeDriver();
-        private readonly HttpClient httpClient = new HttpClient();
+        private readonly HttpClient httpClient = new();
+        private readonly StreamWriter largeFiles;
+        public Downloader(StreamWriter largeFiles)
+        {
+            httpClient.Timeout = TimeSpan.MaxValue;
+            this.largeFiles = largeFiles;
+        }
 
-        public async Task DownloadCourseWithSubsAsync(string categoryName, string courseName,
+        public async Task DownloadCourseWithSubs(string categoryName, string courseName,
                                                       ReadOnlyCollection<IWebElement> subFolders, float maxSize = float.PositiveInfinity)
         {
             foreach (var subFolder in subFolders)
@@ -19,19 +24,19 @@ namespace DataDownload
                 var subFolderName = subAnchor.GetAttribute("innerHTML");
                 var downloadFolder = Directory.CreateDirectory(Path.Combine(categoryName, courseName, subFolderName)).FullName;
                 scrapper.Navigate().GoToUrl(subAnchor.GetAttribute("href"));
-                await DownloadFolderAsync(maxSize, downloadFolder);
+                await ScrapFolder(maxSize, downloadFolder);
             }
         }
 
-        public async Task DownloadCourseAsync(string categoryName, string courseName, string courseUrl,
+        public async Task DownloadCourse(string categoryName, string courseName, string courseUrl,
                                               float maxSize = float.PositiveInfinity)
         {
             var downloadFolder = Directory.CreateDirectory(Path.Combine(categoryName, courseName)).FullName;
             scrapper.Navigate().GoToUrl(courseUrl);
-            await DownloadFolderAsync(maxSize, downloadFolder);
+            await ScrapFolder(maxSize, downloadFolder);
         }
 
-        private async Task DownloadFolderAsync(float maxSize, string downloadFolder)
+        private async Task ScrapFolder(float maxSize, string downloadFolder)
         {
             var pdfNames = new List<string>();
             var pdfUrls = new List<string>();
@@ -46,7 +51,7 @@ namespace DataDownload
                     rowsList.RemoveAt(0);
                 var rows = new ReadOnlyCollection<IWebElement>(rowsList);
 
-                var outputs = await Task.Run(() => ScrapPage(opener, rows, downloadFolder, maxSize));
+                var outputs = await Task.Run(() => ScrapTable(opener, rows, downloadFolder, maxSize));
                 pdfNames.AddRange(outputs.Item1);
                 pdfUrls.AddRange(outputs.Item2);
 
@@ -57,13 +62,12 @@ namespace DataDownload
                     break;
             }
             opener.Quit();
-            await DownloadPdfsAsync(downloadFolder, pdfNames, pdfUrls);
+            await DownloadPdfs(downloadFolder, pdfNames, pdfUrls);
         }
-        public (List<string>, List<string>) ScrapPage(IWebDriver opener, ReadOnlyCollection<IWebElement> rows, string downloadFolder, float maxSize)
+        public (List<string>, List<string>) ScrapTable(IWebDriver opener, ReadOnlyCollection<IWebElement> rows, string downloadFolder, float maxSize)
         {
             var pdfNames = new List<string>();
             var pdfUrls = new List<string>();
-            using var writer = new StreamWriter(largeFilesTxt, true);
 
             foreach (var row in rows)
             {
@@ -87,13 +91,13 @@ namespace DataDownload
                 }
                 else
                 {
-                    writer.Write($"{buttonUrl},     {downloadFolder}");
-                    writer.WriteLine();
+                    largeFiles.Write($"{buttonUrl},     {downloadFolder}");
+                    largeFiles.WriteLine();
                 }
             }
             return (pdfNames, pdfUrls);
         }
-        private async Task DownloadPdfsAsync(string downloadFolder, List<string> pdfNames, List<string> pdfUrls)
+        private async Task DownloadPdfs(string downloadFolder, List<string> pdfNames, List<string> pdfUrls)
         {
             var rarNames = Directory.GetFiles(downloadFolder).ToList();
             if (rarNames.Count > 0)
