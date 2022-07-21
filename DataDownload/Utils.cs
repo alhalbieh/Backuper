@@ -15,12 +15,12 @@ namespace DataDownload
             driver.FindElement(By.XPath("//button[@class='btn-icon submit']")).Click();
         }
 
-        public static IWebDriver CreateChromeDriver(string defaultDownloadPath = "")
+        public static IWebDriver CreateChromeDriver(string defaultDownloadPath = "", bool login = true)
         {
             var chromeOptions = new ChromeOptions();
             if (!string.IsNullOrWhiteSpace(defaultDownloadPath))
                 chromeOptions.AddUserProfilePreference("download.default_directory", $"{defaultDownloadPath}");
-            chromeOptions.AddUserProfilePreference("intl.accept_languages", "nl");
+            //chromeOptions.AddUserProfilePreference("intl.accept_languages", "nl");
             chromeOptions.AddUserProfilePreference("disable-popup-blocking", "true");
             chromeOptions.AddArgument("headless");
             /*
@@ -28,8 +28,8 @@ namespace DataDownload
             chromeDriverService.HideCommandPromptWindow = true;
             var chromeDriver = new ChromeDriver(chromeDriverService, chromeOptions);*/
             var chromeDriver = new ChromeDriver(chromeOptions);
-
-            chromeDriver.LoginZenon();
+            if (login)
+                chromeDriver.LoginZenon();
             return chromeDriver;
         }
 
