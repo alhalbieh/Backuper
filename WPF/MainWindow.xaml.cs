@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -15,6 +17,9 @@ namespace WPF
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
+        private readonly HttpClient _httpClient;
+        private readonly Bank _bank;
+
         private string downloadPath = "Pick a folder to store";
         private bool isNotDownloading = true;
         public ObservableCollection<string> AvaliableCategories { get; set; }
@@ -54,8 +59,9 @@ namespace WPF
 
         public MainWindow()
         {
-            using var _driver = Utils.CreateChromeDriver(login: false);
-            AvaliableCategories = new ObservableCollection<string>(Bank.GetCategories(_driver).Select(x => x.Text).ToList());
+            _httpClient = new HttpClient() { Timeout = Timeout.InfiniteTimeSpan };
+            _bank = new Bank(_httpClient);
+            AvaliableCategories = new ObservableCollection<string>(Bank.GetCategories());
             DownloadCategories = new ObservableCollection<string>();
             InitializeComponent();
         }
@@ -63,7 +69,7 @@ namespace WPF
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
             IsNotDownloading = false;
-            await Task.Run(() => Bank.Backup(DownloadCategories, DownloadPath));
+            await Task.Run(() => _bank.Backup(DownloadCategories, DownloadPath));
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
