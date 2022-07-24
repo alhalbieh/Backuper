@@ -27,7 +27,7 @@ namespace DataDownload
             var chromeDriverService = ChromeDriverService.CreateDefaultService();
             chromeDriverService.HideCommandPromptWindow = true;
             var chromeDriver = new ChromeDriver(chromeDriverService, chromeOptions);*/
-            var chromeDriver = new ChromeDriver(chromeOptions);
+            var chromeDriver = new ChromeDriver(ChromeDriverService.CreateDefaultService(), chromeOptions, Timeout.InfiniteTimeSpan) { Url = "https://bank.engzenon.com" };
             if (login)
                 chromeDriver.LoginZenon();
             return chromeDriver;
@@ -58,7 +58,7 @@ namespace DataDownload
             return oldNames;
         }
 
-        public static List<string> RenameDuplicates(this List<string> oldNames)
+        public static List<string> RenameDuplicates(this IEnumerable<string> oldNames)
         {
             var newNames = new List<string>();
             foreach (var oldName in oldNames)
